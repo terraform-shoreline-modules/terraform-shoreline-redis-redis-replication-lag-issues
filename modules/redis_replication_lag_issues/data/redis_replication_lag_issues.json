@@ -1,0 +1,162 @@
+{
+  "name": "redis_replication_lag_issues",
+  "description": "Redis is an open-source, in-memory data structure store. It is widely used as a database, cache, and message broker. Redis replication lag issues occur when there is a delay in the synchronization of data between master and slave Redis instances. This can happen due to a variety of reasons, such as network latency, high load on the master, or hardware failures. When replication lag occurs, the slave Redis instances are unable to catch up with the master, resulting in data inconsistencies and potentially leading to application failures. It is important to identify and resolve replication lag issues quickly to ensure the reliability and performance of Redis-based applications.",
+  "params": [
+    {
+      "name": "REDIS_HOST",
+      "value": ""
+    },
+    {
+      "name": "NEW_BUFFER_SIZE",
+      "value": ""
+    },
+    {
+      "name": "REDIS_CONF_FILE_PATH",
+      "value": ""
+    },
+    {
+      "name": "REDIS_PORT",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Redis Replication Lag Issues\nRedis is an open-source, in-memory data structure store. It is widely used as a database, cache, and message broker. Redis replication lag issues occur when there is a delay in the synchronization of data between master and slave Redis instances. This can happen due to a variety of reasons, such as network latency, high load on the master, or hardware failures. When replication lag occurs, the slave Redis instances are unable to catch up with the master, resulting in data inconsistencies and potentially leading to application failures. It is important to identify and resolve replication lag issues quickly to ensure the reliability and performance of Redis-based applications."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if Redis is running"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `systemctl status redis`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Redis replication status"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info replication`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Redis key space"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info keyspace`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Redis memory usage"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} info memory`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Redis slow log"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `redis-cli -h ${REDIS_HOST} -p ${REDIS_PORT} slowlog get`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check system memory usage"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `free -m`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check system CPU usage"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `top`"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check network connectivity"
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ping ${REDIS_HOST}`"
+    },
+    {
+      "name": "cell_18",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check Redis configuration file"
+    },
+    {
+      "name": "cell_19",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `cat /etc/redis/redis.conf`"
+    },
+    {
+      "name": "cell_20",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Increase the replication buffer size to reduce the number of missed commands."
+    },
+    {
+      "name": "cell_21",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_update_redis_buffer_size($NEW_BUFFER_SIZE, $REDIS_CONF_FILE_PATH)"
+    }
+  ]
+}
